@@ -1,0 +1,136 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "productId": {
+      "type": "string"
+    },
+    "servicePrincipalId": {
+      "type": "string"
+    },
+    "linuxFxVersion": {
+      "type": "string",
+      "defaultValue": "DOCKER|mcr.microsoft.com/appsvc/staticsite:latest"
+    }
+  },
+  "functions": [],
+  "resources": [
+    {
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "apiVersion": "2020-03-01-preview",
+      "name": "[format('{0}log', parameters('productId'))]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "sku": {
+          "name": "PerGB2018"
+        },
+        "retentionInDays": 30
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2019-06-01",
+      "name": "[format('{0}st', parameters('productId'))]",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "Standard_LRS"
+      },
+      "kind": "StorageV2",
+      "properties": {
+        "accessTier": "Hot"
+      }
+    },
+    {
+      "type": "Microsoft.ContainerRegistry/registries",
+      "apiVersion": "2020-11-01-preview",
+      "name": "[format('{0}acr', parameters('productId'))]",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "Basic"
+      },
+      "properties": {
+        "adminUserEnabled": true
+      }
+    },
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2018-02-01",
+      "name": "[format('{0}plan', parameters('productId'))]",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "B1",
+        "capacity": 1
+      },
+      "kind": "linux",
+      "properties": {
+        "reserved": true
+      }
+    },
+    {
+      "type": "Microsoft.Insights/components",
+      "apiVersion": "2020-02-02-preview",
+      "name": "[format('{0}appappi', parameters('productId'))]",
+      "location": "[resourceGroup().location]",
+      "kind": "web",
+      "properties": {
+        "Application_Type": "web",
+        "WorkspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', format('{0}log', parameters('productId')))]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', format('{0}log', parameters('productId')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2018-11-01",
+      "name": "[format('{0}app', parameters('productId'))]",
+      "location": "[resourceGroup().location]",
+      "kind": "app,linux,container",
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', format('{0}plan', parameters('productId')))]",
+        "httpsOnly": true,
+        "siteConfig": {
+          "alwaysOn": true,
+          "minTlsVersion": "1.2",
+          "linuxFxVersion": "[parameters('linuxFxVersion')]",
+          "httpLoggingEnabled": true,
+          "logsDirectorySizeLimit": 35,
+          "appSettings": [
+            {
+              "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+              "value": "[reference(resourceId('Microsoft.Insights/components', format('{0}appappi', parameters('productId')))).InstrumentationKey]"
+            },
+            {
+              "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+              "value": "[reference(resourceId('Microsoft.Insights/components', format('{0}appappi', parameters('productId')))).ConnectionString]"
+            },
+            {
+              "name": "DOCKER_REGISTRY_SERVER_PASSWORD",
+              "value": "[listCredentials(resourceId('Microsoft.ContainerRegistry/registries', format('{0}acr', parameters('productId'))), '2020-11-01-preview').passwords[0].value]"
+            },
+            {
+              "name": "DOCKER_REGISTRY_SERVER_USERNAME",
+              "value": "[format('{0}acr', parameters('productId'))]"
+            },
+            {
+              "name": "DOCKER_REGISTRY_SERVER_URL",
+              "value": "[format('https://{0}', reference(resourceId('Microsoft.ContainerRegistry/registries', format('{0}acr', parameters('productId')))).loginServer)]"
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ContainerRegistry/registries', format('{0}acr', parameters('productId')))]",
+        "[resourceId('Microsoft.Insights/components', format('{0}appappi', parameters('productId')))]",
+        "[resourceId('Microsoft.Web/serverfarms', format('{0}plan', parameters('productId')))]"
+      ]
+    }
+  ],
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.3.126.58533",
+      "templateHash": "17405743883592143090"
+    }
+  }
+}
