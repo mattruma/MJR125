@@ -36,7 +36,7 @@ stages:
                   command: buildAndPush
                   repository: 'webapplication1'
                   dockerfile: '$(Build.SourcesDirectory)/src/WebApplication1/Dockerfile'
-                  buildContext: '$(Build.SourcesDirectory)/src/Services/Users'
+                  buildContext: '$(Build.SourcesDirectory)/src'
                   containerRegistry: '$(ProductId)acr'
                   tags: |
                     $(Build.BuildNumber)
