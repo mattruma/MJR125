@@ -41,13 +41,13 @@ stages:
                   tags: |
                     $(Build.BuildNumber)
 
-              - task: AzureRmWebAppDeployment@4
-                displayName: Deploy to app service
-                inputs:
-                  ConnectionType: 'AzureRM'
-                  azureSubscription: '$(SubscriptionId)'
-                  appType: 'webAppContainer'
-                  WebAppName: '$(ProductId)app'
-                  DockerNamespace: '$(ProductId)acr'
-                  DockerRepository: 'webapplication1'
-                  DockerImageTag: '$(Build.BuildNumber)'
+              # - task: AzureRmWebAppDeployment@4
+              #   displayName: Deploy to app service
+              #   inputs:
+              #     ConnectionType: 'AzureRM'
+              #     azureSubscription: '$(SubscriptionId)'
+              #     appType: 'webAppContainer'
+              #     WebAppName: '$(ProductId)app'
+              #     DockerNamespace: '$(ProductId)acr'
+              #     DockerRepository: 'webapplication1'
+              #     DockerImageTag: '$(Build.BuildNumber)'
