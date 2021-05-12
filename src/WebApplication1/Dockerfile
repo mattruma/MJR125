@@ -17,7 +17,7 @@ RUN dotnet build "WebApplication1.Tests/WebApplication1.Tests.csproj" -c Release
 RUN dotnet test "WebApplication1.Tests/WebApplication1.Tests.csproj" --logger "trx;LogFileName=webapplication1.trx" 
 
 FROM build AS publish
-RUN dotnet publish "WebApplication1.csproj" -c Release -o /app/publish
+RUN dotnet publish "WebApplication1/WebApplication1.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
