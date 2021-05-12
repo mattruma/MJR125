@@ -24,22 +24,5 @@ namespace WebApplication1.Tests
 
             Assert.IsType<OkObjectResult>(result.Result);
         }
-
-        //[Fact]
-        //public void Given_Browser_When_Get_Should_ReturnOK()
-        //{
-        //    var options = new ChromeOptions();
-
-        //    //options.AddArgument("--headless");
-
-        //    options.AddArgument("--window-size=1920,1080");
-
-        //    using (var driver = new ChromeDriver(".", options))
-        //    {
-        //        driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
-
-        //        driver.Navigate().GoToUrl("https://localhost:44387/WeatherForecast");
-        //    }
-        //}
     }
 }
