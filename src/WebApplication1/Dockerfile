@@ -14,7 +14,6 @@ RUN dotnet restore "WebApplication1.Tests/WebApplication1.Tests.csproj"
 COPY . .
 RUN dotnet build "WebApplication1/WebApplication1.csproj" -c Release -o /app/build
 RUN dotnet build "WebApplication1.Tests/WebApplication1.Tests.csproj" -c Release -o /app/build
-
 RUN dotnet test "WebApplication1.Tests/WebApplication1.Tests.csproj" --logger "trx;LogFileName=webapplication1.trx" 
 
 FROM build AS publish
